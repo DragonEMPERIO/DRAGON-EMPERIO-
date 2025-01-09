@@ -28,7 +28,7 @@
     main {
       display: flex;
       flex: 1;
-      padding: 10px;
+      padding: 2px;
     }
     .sidebar {
       width: 35%;
@@ -52,7 +52,7 @@
       padding: 5px;
       background: #3b3f51;
       margin-bottom: 5px;
-      border-radius: 5px;
+      border-radius: 10px;
       cursor: pointer;
     }
     .folder-item span {
@@ -75,12 +75,12 @@
       background: #1e1e2f;
       border: 1px solid #44475a;
       color: #fff;
-      padding: 10px;
-      font-size: 0.9rem;
+      padding: 5px;
+      font-size: 1.0rem;
       resize: none;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       display: none;
-      font-family: "Courier New", Courier, monospace;
+      font-family: "Fira Code", Courier, monospace;
     }
     .buttons {
       display: flex;
@@ -139,6 +139,10 @@
     .html {
       color: #66d9ef;
     }
+    
+  
+    
+    
   </style>
 </head>
 <body>
@@ -251,5 +255,75 @@
 
     updateFolderList();
   </script>
+  
+  
+  
+  
+  <a href="#" id="termsLink" style="color: blue; text-decoration: underline; font-size: 14px; margin: 15px; display: inline-block;">Termos de serviço</a>
+
+<div id="termsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: darkblue; padding: 40px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000; border-radius: 8px; width: 80%; max-width: 800px; max-height: 80%; overflow-y: auto; font-size: 16px; line-height: 1.6;">
+
+    <h2 style="margin-bottom: 20px; font-size: 24px;">Termos de Serviço</h2>
+    <p>Estes são os termos do site. Por favor, leia com atenção antes de continuar. A plataforma oferece recursos de aprendizado de programação, incluindo código interativo em HTML, CSS, JavaScript e Python. Ao utilizar o site, você concorda com os seguintes termos e condições:</p>
+
+    <div style="margin-bottom: 20px;">
+        <strong>1. Uso do Site</strong>
+        <p>O uso do site é gratuito, mas algumas funcionalidades premium poderão ser adicionadas futuramente. Você concorda em utilizar a plataforma apenas para fins legais e educacionais.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <strong>2. Responsabilidade do Usuário</strong>
+        <p>Você é responsável pelo uso da sua conta e pela segurança das informações inseridas no site. Não nos responsabilizamos por qualquer uso indevido de sua conta.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <strong>3. Modificações do Serviço</strong>
+        <p>Nos reservamos o direito de modificar ou encerrar a plataforma a qualquer momento, com ou sem aviso prévio. Estamos constantemente trabalhando para melhorar a experiência do usuário.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <strong>4. Proibição de Atividades Ilegais</strong>
+        <p>Você concorda em não usar a plataforma para atividades ilícitas ou prejudiciais, incluindo, mas não se limitando a, atividades de hacking, fraudes ou distribuição de software malicioso.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <strong>5. Privacidade e Proteção de Dados</strong>
+        <p>Valorizamos a sua privacidade. Nenhuma informação pessoal será compartilhada sem o seu consentimento. Consulte nossa Política de Privacidade para mais detalhes.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <strong>6. Proteção contra Bots (Futuro)</strong>
+        <p>Estamos em processo de implementação de uma proteção robusta contra bots, visando aumentar a segurança da plataforma para todos os usuários.</p>
+    </div>
+
+    <button id="closeModal" style="background: red; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px;">Fechar</button>
+</div>
+
+<div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+<script>
+    const termsLink = document.getElementById('termsLink');
+    const termsModal = document.getElementById('termsModal');
+    const closeModal = document.getElementById('closeModal');
+    const overlay = document.getElementById('overlay');
+
+    termsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        termsModal.style.display = 'block';
+        overlay.style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', () => {
+        termsModal.style.display = 'none';
+        overlay.style.display = 'none';
+    });
+
+    overlay.addEventListener('click', () => {
+        termsModal.style.display = 'none';
+        overlay.style.display = 'none';
+    });
+</script>
+  
+
 </body>
 </html>

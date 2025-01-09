@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -56,7 +56,8 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        input[type="text"], input[type="email"], input[type="password"] {
+        input[type="text"], input[type="email"], input[type="password"]
+        {
             width: 80%;
             padding: 10px;
             margin: 10px 0;
@@ -92,6 +93,73 @@
         button:focus {
             outline: none;
         }
+        
+      
+        #modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff0077, #ff7700);
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+#modalContent {
+    background-color: white;
+    padding: 30px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 300px;
+}
+
+#codeDisplay {
+    font-size: 30px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    padding: 10px;
+    font-size: 20px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+}
+
+#verifyButton {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#loadingScreen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 2000;
+}
     </style>
 </head>
 <body>
@@ -101,7 +169,7 @@
         <p>Preencha as informações, isso e um teste pra verificar robo, mais adicionaremos segurança própria </p>
 
         <form id="signupForm">
-            <input type="text" id="name" placeholder="Nome completo" required><br>
+            <br>
             <input type="email" id="email" placeholder="Seu e-mail" required><br>
             <input type="password" id="password" placeholder="Sua senha" required><br>
             <button type="submit">Cadastrar</button>
@@ -113,12 +181,12 @@
             event.preventDefault();  // Impede o comportamento padrão de envio do formulário
 
             // Coleta os valores dos campos
-            const name = document.getElementById('name').value;
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             // Verifica se os campos estão preenchidos
-            if (name && email && password) {
+            if (email && password) {
                 const userData = {
                     name: name,
                     email: email,
@@ -135,6 +203,133 @@
             }
         });
     </script>
+    
+    <script>
+let attemptCount = parseInt(localStorage.getItem('attemptCount')) || 0;
+let lockTime = parseInt(localStorage.getItem('lockTime')) || 0; // Tempo de bloqueio (em segundos)
+
+// Função para gerar um código aleatório de 8 dígitos
+function generateCode() {
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+        code += Math.floor(Math.random() * 10);
+    }
+    return code;
+}
+
+// Criação do modal
+const modal = document.createElement('div');
+modal.id = 'modal';
+const modalContent = document.createElement('div');
+modalContent.id = 'modalContent';
+const codeDisplay = document.createElement('div');
+codeDisplay.id = 'codeDisplay';
+const userInput = document.createElement('input');
+userInput.type = 'text';
+userInput.placeholder = 'Insira o código';
+const verifyButton = document.createElement('button');
+verifyButton.id = 'verifyButton';
+verifyButton.textContent = 'Verificar';
+const lockMessage = document.createElement('div');
+lockMessage.id = 'lockMessage';
+
+// Adiciona elementos ao modal
+modalContent.appendChild(codeDisplay);
+modalContent.appendChild(userInput);
+modalContent.appendChild(verifyButton);
+modal.appendChild(modalContent);
+document.body.appendChild(modal);
+
+// Adiciona a mensagem de bloqueio
+document.body.appendChild(lockMessage);
+
+// Exibir código aleatório no modal
+const generatedCode = generateCode();
+codeDisplay.textContent = generatedCode;
+
+// Função para formatar tempo restante do bloqueio
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+}
+
+// Função para bloquear a digitação
+function blockInput() {
+    userInput.disabled = true;
+    userInput.placeholder = `Você está bloqueado. Tempo restante: ${formatTime(lockTime)}`;
+}
+
+// Função para liberar o input
+function unlockInput() {
+    userInput.disabled = false;
+    userInput.placeholder = 'Insira o código';
+}
+
+// Bloquear copiar
+userInput.addEventListener('copy', (e) => {
+    e.preventDefault();
+});
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+
+// Exibir o modal assim que o site carregar
+window.onload = () => {
+    modal.style.display = 'flex';  // Garante que o modal apareça ao carregar
+};
+
+// Verificação do código e tentativas
+verifyButton.addEventListener('click', function() {
+    if (lockTime > 0) {
+        lockMessage.textContent = `Você está bloqueado. Tente novamente em ${formatTime(lockTime)}.`;
+        return;
+    }
+
+    const inputCode = userInput.value.trim();
+
+    if (inputCode === generatedCode) {
+        // Fechar o modal imediatamente após a verificação
+        modal.style.display = 'none';
+        // Limpar o localStorage após sucesso
+        localStorage.removeItem('attemptCount');
+        localStorage.removeItem('lockTime');
+    } else {
+        attemptCount++;
+        if (attemptCount >= 3) {
+            lockTime = 10 * 60; // Bloqueio por 10 minutos
+            blockInput();
+            const lockInterval = setInterval(() => {
+                lockTime--;
+                if (lockTime <= 0) {
+                    clearInterval(lockInterval);
+                    unlockInput();
+                    lockMessage.textContent = '';
+                    attemptCount = 0;
+                    localStorage.removeItem('lockTime');
+                } else {
+                    lockMessage.textContent = `Você está bloqueado. Tente novamente em ${formatTime(lockTime)}.`;
+                    localStorage.setItem('lockTime', lockTime);
+                }
+                localStorage.setItem('attemptCount', attemptCount);
+            }, 1000); // Atualiza o contador a cada segundo
+        } else {
+            alert('Código incorreto. Tente novamente.');
+        }
+    }
+});
+
+// Função para persistir as tentativas e bloqueio no localStorage
+function persistLockState() {
+    if (attemptCount >= 3 && lockTime > 0) {
+        localStorage.setItem('attemptCount', attemptCount);
+        localStorage.setItem('lockTime', lockTime);
+    }
+}
+
+setInterval(persistLockState, 1000); // Salva o estado a cada segundo
+    </script>
+    
     
 
 </body>
