@@ -127,11 +127,6 @@
     }
 
     /* Code Styling */
-    .highlight {
-      color: #ff79c6;
-    }
-
-    /* Color Syntax */
     .const {
       color: #8be9fd;
     }
@@ -166,6 +161,7 @@
     <button class="modal-close">Fechar</button>
     <iframe id="modal-output"></iframe>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
     const folderList = document.getElementById('folder-list');
     const codeEditor = document.getElementById('code-editor');
@@ -178,16 +174,14 @@
     let folders = JSON.parse(localStorage.getItem('folders')) || {};
     let currentFile = null;
 
-    // Fechar Modal
     document.querySelector('.modal-close').addEventListener('click', () => {
       modal.style.display = 'none';
     });
 
-    // Criar Nova Pasta
     document.getElementById('create-folder').addEventListener('click', () => {
-      const folderName = prompt('Digite o nome da pasta (com a extensão no final, ex: "pagina.html", "style.css")');
+      const folderName = prompt('Digite o nome da pasta (ex: "index.html", "style.css")');
       if (folderName && !folders[folderName]) {
-        folders[folderName] = { [folderName]: '' };
+        folders[folderName] = '';
         updateFolderList();
         saveToLocalStorage();
       } else {
@@ -195,92 +189,54 @@
       }
     });
 
-    // Atualizar Lista de Pastas
     function updateFolderList() {
       folderList.innerHTML = '';
       for (const folderName in folders) {
         const folderItem = document.createElement('div');
         folderItem.className = 'folder-item';
-
-        const folderLabel = document.createElement('span');
-        folderLabel.textContent = folderName;
-        folderItem.appendChild(folderLabel);
-
-        const deleteButton = document.createElement('span');
-        deleteButton.textContent = '❌';
-        deleteButton.className = 'delete';
-        deleteButton.addEventListener('click', (e) => {
+        folderItem.innerHTML = `
+          <span>${folderName}</span>
+          <span class="delete">❌</span>
+        `;
+        folderItem.querySelector('.delete').addEventListener('click', (e) => {
           e.stopPropagation();
-          deleteFolder(folderName);
+          delete folders[folderName];
+          updateFolderList();
+          saveToLocalStorage();
         });
-
-        folderItem.appendChild(deleteButton);
+        folderItem.addEventListener('click', () => openFolder(folderName));
         folderList.appendChild(folderItem);
-
-        folderItem.addEventListener('click', () => {
-          openFolder(folderName);
-        });
       }
     }
 
-    // Excluir Pasta
-    function deleteFolder(folderName) {
-      const confirmDelete = confirm(`Tem certeza que deseja excluir a pasta ${folderName}?`);
-      if (confirmDelete) {
-        delete folders[folderName];
-        updateFolderList();
-        saveToLocalStorage();
-      }
-    }
-
-    // Abrir Pasta e Carregar Arquivo
     function openFolder(folderName) {
-      currentFile = { folder: folderName, file: folderName };
-      codeEditor.value = folders[folderName][folderName];
+      currentFile = folderName;
+      codeEditor.value = folders[folderName];
       codeEditor.style.display = 'block';
       editorButtons.style.display = 'flex';
-      saveToLocalStorage();
-      highlightSyntax(codeEditor.value);
     }
 
-    // Atualizar Arquivo
     codeEditor.addEventListener('input', () => {
-      if (currentFile) {
-        folders[currentFile.folder][currentFile.file] = codeEditor.value;
-        saveToLocalStorage();
-        highlightSyntax(codeEditor.value);
-      }
+      if (currentFile) folders[currentFile] = codeEditor.value;
+      saveToLocalStorage();
     });
 
-    // Executar Código
     runCodeButton.addEventListener('click', () => {
-      if (!currentFile) {
-        alert('Nenhum arquivo aberto.');
-        return;
+      if (!currentFile) return alert('Nenhum arquivo aberto.');
+      const extension = currentFile.split('.').pop();
+      if (extension === 'html') {
+        modalOutput.srcdoc = folders[currentFile];
+      } else if (extension === 'js') {
+        modalOutput.srcdoc = `<script>${folders[currentFile]}<\/script>`;
+      } else if (extension === 'css') {
+        modalOutput.srcdoc = `<style>${folders[currentFile]}</style>`;
       }
-
-      let html = folders[currentFile.folder]['index.html'] || '';
-      let css = `<style>${folders[currentFile.folder]['style.css'] || ''}</style>`;
-      let js = `<script>${folders[currentFile.folder]['script.js'] || ''}<\/script>`;
-
-      modalOutput.srcdoc = html + css + js;
       modal.style.display = 'flex';
     });
 
-    // Exportar Código
     exportButton.addEventListener('click', () => {
       const zip = new JSZip();
-      
-      // Agrupar arquivos por extensão
-      const groupedFolders = {};
-      for (const folderName in folders) {
-        const extension = folderName.split('.').pop();
-        if (!groupedFolders[extension]) {
-          groupedFolders[extension] = zip.folder(extension);
-        }
-        groupedFolders[extension].file(folderName, folders[folderName][folderName]);
-      }
-      
+      for (const name in folders) zip.file(name, folders[name]);
       zip.generateAsync({ type: 'blob' }).then((content) => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(content);
@@ -289,24 +245,11 @@
       });
     });
 
-    // Salvar no localStorage
     function saveToLocalStorage() {
       localStorage.setItem('folders', JSON.stringify(folders));
     }
 
-    // Inicializar a página
     updateFolderList();
-
-    // Função para aplicar a coloração da sintaxe no editor
-    function highlightSyntax(code) {
-      let highlightedCode = code
-        .replace(/\b(const)\b/g, '<span class="const">$1</span>')  // 'const' em azul
-        .replace(/\b(print)\b/g, '<span class="print">$1</span>')  // 'print' em amarelo
-        .replace(/\b\d+\b/g, '<span class="number">$&</span>')  // números em laranja
-        .replace(/<\/?[\w\s]*>/g, '<span class="html">$&</span>'); // tags HTML em azul
-
-      codeEditor.innerHTML = highlightedCode;  // Aqui vamos atualizar o conteúdo com as palavras-chave coloridas
-    }
   </script>
 </body>
 </html>
