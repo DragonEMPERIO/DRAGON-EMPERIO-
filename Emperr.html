@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DRAGON - EMPERIO</title>
+  <title>Editor Avançado</title>
   <style>
     * {
       margin: 0;
@@ -31,7 +31,7 @@
       padding: 10px;
     }
     .sidebar {
-      width: 40%;
+      width: 35%;
       background: #282a36;
       padding: 10px;
       border-right: 1px solid #44475a;
@@ -75,13 +75,12 @@
       background: #1e1e2f;
       border: 1px solid #44475a;
       color: #fff;
-      padding: 5px;
+      padding: 10px;
       font-size: 0.9rem;
       resize: none;
       margin-bottom: 10px;
       display: none;
       font-family: "Courier New", Courier, monospace;
-      border-radius: 10px;
     }
     .buttons {
       display: flex;
@@ -208,7 +207,7 @@
         folderItem.appendChild(folderLabel);
 
         const deleteButton = document.createElement('span');
-        deleteButton.textContent = '×';
+        deleteButton.textContent = '❌';
         deleteButton.className = 'delete';
         deleteButton.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -264,7 +263,7 @@
       let css = `<style>${folders[currentFile.folder]['style.css'] || ''}</style>`;
       let js = `<script>${folders[currentFile.folder]['script.js'] || ''}<\/script>`;
 
-      modalOutput.srcdoc = html + css + js;  // Corrigir a maneira de passar o conteúdo para o iframe
+      modalOutput.srcdoc = html + css + js;
       modal.style.display = 'flex';
     });
 
@@ -298,7 +297,7 @@
     // Inicializar a página
     updateFolderList();
 
-// Função para aplicar a coloração da sintaxe no editor
+    // Função para aplicar a coloração da sintaxe no editor
     function highlightSyntax(code) {
       let highlightedCode = code
         .replace(/\b(const)\b/g, '<span class="const">$1</span>')  // 'const' em azul
@@ -306,9 +305,8 @@
         .replace(/\b\d+\b/g, '<span class="number">$&</span>')  // números em laranja
         .replace(/<\/?[\w\s]*>/g, '<span class="html">$&</span>'); // tags HTML em azul
 
-      codeEditor.innerHTML = highlightedCode;  // Atualiza o conteúdo com as palavras-chave coloridas
+      codeEditor.innerHTML = highlightedCode;  // Aqui vamos atualizar o conteúdo com as palavras-chave coloridas
     }
   </script>
-  
 </body>
 </html>
