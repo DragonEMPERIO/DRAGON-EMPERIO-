@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DRAGON - EMPERIO</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e2f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #282a36;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #44475a;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      padding: 10px;
+    }
+    .sidebar {
+      width: 40%;
+      background: #282a36;
+      padding: 10px;
+      border-right: 1px solid #44475a;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar h3 {
+      margin-bottom: 10px;
+    }
+    .folder-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .folder-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px;
+      background: #3b3f51;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .folder-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .folder-item .delete {
+      color: #ff5555;
+      cursor: pointer;
+    }
+    .editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+    textarea {
+      flex: 1;
+      background: #1e1e2f;
+      border: 1px solid #44475a;
+      color: #fff;
+      padding: 5px;
+      font-size: 0.9rem;
+      resize: none;
+      margin-bottom: 10px;
+      display: none;
+      font-family: "Courier New", Courier, monospace;
+      border-radius: 10px;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+    }
+    .primary {
+      background: #50fa7b;
+    }
+    .danger {
+      background: #ff5555;
+    }
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modal iframe {
+      width: 90%;
+      height: 90%;
+      border: none;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff5555;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Code Styling */
+    .highlight {
+      color: #ff79c6;
+    }
+
+    /* Color Syntax */
+    .const {
+      color: #8be9fd;
+    }
+    .print {
+      color: #f1fa8c;
+    }
+    .number {
+      color: #ffb86c;
+    }
+    .html {
+      color: #66d9ef;
+    }
+  </style>
+</head>
+<body>
+  <header>Editor Avançado</header>
+  <main>
+    <div class="sidebar">
+      <h3>Pastas</h3>
+      <button id="create-folder" class="primary">Criar Pasta</button>
+      <div class="folder-list" id="folder-list"></div>
+    </div>
+    <div class="editor">
+      <textarea id="code-editor" placeholder="Selecione ou crie um arquivo..."></textarea>
+      <div class="buttons" id="editor-buttons" style="display: none;">
+        <button id="run-code" class="primary">Executar Código</button>
+        <button id="export-code" class="primary">Exportar Código</button>
+      </div>
+    </div>
+  </main>
+  <div id="modal">
+    <button class="modal-close">Fechar</button>
+    <iframe id="modal-output"></iframe>
+  </div>
+  <script>
+    const folderList = document.getElementById('folder-list');
+    const codeEditor = document.getElementById('code-editor');
+    const modal = document.getElementById('modal');
+    const modalOutput = document.getElementById('modal-output');
+    const runCodeButton = document.getElementById('run-code');
+    const exportButton = document.getElementById('export-code');
+    const editorButtons = document.getElementById('editor-buttons');
+
+    let folders = JSON.parse(localStorage.getItem('folders')) || {};
+    let currentFile = null;
+
+    // Fechar Modal
+    document.querySelector('.modal-close').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    // Criar Nova Pasta
+    document.getElementById('create-folder').addEventListener('click', () => {
+      const folderName = prompt('Digite o nome da pasta (com a extensão no final, ex: "pagina.html", "style.css")');
+      if (folderName && !folders[folderName]) {
+        folders[folderName] = { [folderName]: '' };
+        updateFolderList();
+        saveToLocalStorage();
+      } else {
+        alert('Pasta já existe ou nome inválido.');
+      }
+    });
+
+    // Atualizar Lista de Pastas
+    function updateFolderList() {
+      folderList.innerHTML = '';
+      for (const folderName in folders) {
+        const folderItem = document.createElement('div');
+        folderItem.className = 'folder-item';
+
+        const folderLabel = document.createElement('span');
+        folderLabel.textContent = folderName;
+        folderItem.appendChild(folderLabel);
+
+        const deleteButton = document.createElement('span');
+        deleteButton.textContent = '×';
+        deleteButton.className = 'delete';
+        deleteButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFolder(folderName);
+        });
+
+        folderItem.appendChild(deleteButton);
+        folderList.appendChild(folderItem);
+
+        folderItem.addEventListener('click', () => {
+          openFolder(folderName);
+        });
+      }
+    }
+
+    // Excluir Pasta
+    function deleteFolder(folderName) {
+      const confirmDelete = confirm(`Tem certeza que deseja excluir a pasta ${folderName}?`);
+      if (confirmDelete) {
+        delete folders[folderName];
+        updateFolderList();
+        saveToLocalStorage();
+      }
+    }
+
+    // Abrir Pasta e Carregar Arquivo
+    function openFolder(folderName) {
+      currentFile = { folder: folderName, file: folderName };
+      codeEditor.value = folders[folderName][folderName];
+      codeEditor.style.display = 'block';
+      editorButtons.style.display = 'flex';
+      saveToLocalStorage();
+      highlightSyntax(codeEditor.value);
+    }
+
+    // Atualizar Arquivo
+    codeEditor.addEventListener('input', () => {
+      if (currentFile) {
+        folders[currentFile.folder][currentFile.file] = codeEditor.value;
+        saveToLocalStorage();
+        highlightSyntax(codeEditor.value);
+      }
+    });
+
+    // Executar Código
+    runCodeButton.addEventListener('click', () => {
+      if (!currentFile) {
+        alert('Nenhum arquivo aberto.');
+        return;
+      }
+
+      let html = folders[currentFile.folder]['index.html'] || '';
+      let css = `<style>${folders[currentFile.folder]['style.css'] || ''}</style>`;
+      let js = `<script>${folders[currentFile.folder]['script.js'] || ''}<\/script>`;
+
+      modalOutput.srcdoc = html + css + js;  // Corrigir a maneira de passar o conteúdo para o iframe
+      modal.style.display = 'flex';
+    });
+
+    // Exportar Código
+    exportButton.addEventListener('click', () => {
+      const zip = new JSZip();
+      
+      // Agrupar arquivos por extensão
+      const groupedFolders = {};
+      for (const folderName in folders) {
+        const extension = folderName.split('.').pop();
+        if (!groupedFolders[extension]) {
+          groupedFolders[extension] = zip.folder(extension);
+        }
+        groupedFolders[extension].file(folderName, folders[folderName][folderName]);
+      }
+      
+      zip.generateAsync({ type: 'blob' }).then((content) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = 'project.zip';
+        a.click();
+      });
+    });
+
+    // Salvar no localStorage
+    function saveToLocalStorage() {
+      localStorage.setItem('folders', JSON.stringify(folders));
+    }
+
+    // Inicializar a página
+    updateFolderList();
+
+// Função para aplicar a coloração da sintaxe no editor
+    function highlightSyntax(code) {
+      let highlightedCode = code
+        .replace(/\b(const)\b/g, '<span class="const">$1</span>')  // 'const' em azul
+        .replace(/\b(print)\b/g, '<span class="print">$1</span>')  // 'print' em amarelo
+        .replace(/\b\d+\b/g, '<span class="number">$&</span>')  // números em laranja
+        .replace(/<\/?[\w\s]*>/g, '<span class="html">$&</span>'); // tags HTML em azul
+
+      codeEditor.innerHTML = highlightedCode;  // Atualiza o conteúdo com as palavras-chave coloridas
+    }
+  </script>
+  
+</body>
+</html>

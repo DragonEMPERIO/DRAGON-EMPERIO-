@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Emperio - Robot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            animation: fadeIn 1.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .login-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+            transform: scale(0.9);
+            animation: scaleUp 0.5s forwards;
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(0.7);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4285F4;
+            color: white;
+            font-size: 16px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #357AE8;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            background-color: #2c6ac1;
+            transform: translateY(1px);
+        }
+
+        button:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Dragon Emperio - Robot</h1>
+        <p>Preencha as informações, isso e um teste pra verificar robo, mais adicionaremos segurança própria </p>
+
+        <form id="signupForm">
+            <input type="text" id="name" placeholder="Nome completo" required><br>
+            <input type="email" id="email" placeholder="Seu e-mail" required><br>
+            <input type="password" id="password" placeholder="Sua senha" required><br>
+            <button type="submit">Cadastrar</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // Impede o comportamento padrão de envio do formulário
+
+            // Coleta os valores dos campos
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Verifica se os campos estão preenchidos
+            if (name && email && password) {
+                const userData = {
+                    name: name,
+                    email: email,
+                    password: password
+                };
+
+                // Salva os dados no localStorage
+                localStorage.setItem('userData', JSON.stringify(userData));
+
+                // Redireciona para a página Emperr.html após o cadastro
+                window.location.href = "Emperr.html";
+            } else {
+                alert("Por favor, preencha todos os campos.");
+            }
+        });
+    </script>
+    
+
+</body>
+</html>
